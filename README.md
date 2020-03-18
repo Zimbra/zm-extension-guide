@@ -82,8 +82,8 @@ Create a folder on your local computer to store the `Mytest` extension and insta
 Next step is to copy the Java libraries from your test server to your local computer.
 
 
-      mkdir ~/zimbra_extension_course/extension/lib
-      scp root@testserver:/opt/zimbra/lib/jars/* ~/zimbra_extension_course/extension/lib
+      mkdir ~/zimbra_extension_course/lib
+      scp root@testserver:/opt/zimbra/lib/jars/* ~/zimbra_extension_course/lib
       
 In this article we will show you how to use the Java Development Kit (JDK) from the test server on your local machine. You can use a different JDK, but doing it like this gives some extra certainty that the compiled extension will work on your test server.
 
@@ -182,7 +182,7 @@ Go to https://www.jetbrains.com/idea/download/ and install IntelliJ on your loca
 
 ![](screenshots/01-import-wizard/06-IntelliJ-select-libs.png)
 
-*This step configures where IntelliJ can find the Java libraries. Libraries are dependencies the `Mytest` extension needs to build and run. IntelliJ will find jar files recursively and enable them by default in this wizard. You should only check the library item that contains the libraries we added in ~/zimbra_extension_course/extension/lib. Make sure to uncheck everything else! In this case there should only be one enabled lib item, that contains activation.jar...zookeer.jar.*
+*This step configures where IntelliJ can find the Java libraries. Libraries are dependencies the `Mytest` extension needs to build and run. IntelliJ will find jar files recursively and enable them by default in this wizard. You should only check the library item that contains the libraries we added in ~/zimbra_extension_course/lib. Make sure to uncheck everything else! In this case there should only be one enabled lib item, that contains activation.jar...zookeer.jar.*
 
 ![](screenshots/01-import-wizard/07-IntelliJ-set-modules.png)
 
