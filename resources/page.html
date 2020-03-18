@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World</title>
+</head>
+<body>
+Post some JSON and optional binaries:<br>
+<textarea rows="5" cols="100" id="jsonarea">{ "email": "test@example.com", "testfield": { "test": "🤪 😵 😡 😠 % & + German  Umlauts: ä ö ü /\#%20" } }</textarea><br>
+<input type="file" id="filesToUpload" name="filesToUpload" multiple><br>
+<button onclick="sendJSON()">Send JSON</button><br>
+<hr>
+<script>
+   function sendJSON() {
+      var formData = new FormData();  
+      formData.append("jsondata", document.getElementById('jsonarea').value);
+     
+      // HTML file input, chosen by user
+      var ins = document.getElementById('filesToUpload').files.length;
+      for (var x = 0; x < ins; x++) {
+          formData.append("filesToUpload[]", document.getElementById('filesToUpload').files[x]);
+      }
+      
+      var request = new XMLHttpRequest();
+      request.open("POST", "mytest");
+      request.send(formData);
+      request.onload = function (e) {
+         try {
+            var response = JSON.parse(request.responseText);
+            var files = response.files;
+
+            for (const [filename, fileContents] of Object.entries(files)) {
+                if(fileContents.indexOf("data:image/")==0)
+                {
+                   //appears to be an image
+                   img = new Image();
+                   img.src = fileContents;
+                   img.title = filename;
+                   img.style.width = '800px';
+                   img.style.height = 'auto';
+                   document.getElementById("images").appendChild(img);
+                }
+            }
+         
+            document.getElementById('serverResponse').innerText=request.responseText;
+         } catch (error)
+         {
+            alert(error);
+         }
+      }.bind(this);
+     
+   }
+</script>
+
+<br>
+Server response:<br>
+<div style="background-color: #eeeeee; padding:5px; font-family:monospace; margin:4px, 4px; width: 600px; height: 300px; overflow-x: hidden; overflow-x: auto; text-align:justify;" id="serverResponse"></div>
+<div id="images"></div>
+</body>
+</html>
