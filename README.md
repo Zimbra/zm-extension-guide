@@ -118,6 +118,48 @@ The output should be like this:
 
 We will explain the build process later in the article.
 
+## Enable multipart/form-data on Zimbra Extensions
+
+Enable multipart-config on your test server to enable processing of JSON and binary files in a single HTTP request. Append the following:
+
+```xml
+   <multipart-config>
+   </multipart-config>
+```
+
+To the `ExtensionDispatcherServlet` in the files:
+
+   - /opt/zimbra/jetty_base/etc/service.web.xml.in
+   - /opt/zimbra/jetty_base/webapps/service/WEB-INF/web.xml
+
+Restart Zimbra with `zmcontrol restart`. The final result looks like this on 8.8.15 patch 8:
+
+```xml
+  <servlet>
+    <servlet-name>ExtensionDispatcherServlet</servlet-name>
+    <servlet-class>com.zimbra.cs.extension.ExtensionDispatcherServlet</servlet-class>
+    <async-supported>true</async-supported>
+    <load-on-startup>2</load-on-startup>
+    <init-param>
+      <param-name>allowed.ports</param-name>
+      <param-value>8080, 8443, 7071, 7070, 7072, 7443</param-value>
+    </init-param>
+  <multipart-config>
+  </multipart-config>
+  </servlet>
+```
+
+This will allow you to use HttpServletRequest.getPart() and HttpServletRequest.getParts() to get multipart/form-data parts. Without this config change you will need to use org.apache.commons.fileupload and do some manual processing, this is (encoding) error prone.
+
+Further reading: 
+
+   - https://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
+   - https://docs.oracle.com/javaee/6/api/javax/servlet/annotation/MultipartConfig.html
+   - http://www.mastertheboss.com/javaee/servlet-30/uploading-a-file-with-a-servlet
+   - https://en.wikipedia.org/wiki/Mojibake
+
+If you do not want to make such a change on your production server, you can do a file upload using: https://github.com/Zimbra-Community/owncloud-zimlet/blob/soapServiceBarry/docconvert/extension/src/tk/barrydegraaff/docconvert/DocConvert.java
+
 ## Deploying the extension
 
 To deploy the extension to your test server, you must first create a folder on your test server:
@@ -129,7 +171,7 @@ Then you can copy the extension to your test server and remove it from the local
       scp ~/zimbra_extension_course/mytest.jar root@testserver:/opt/zimbra/lib/ext/mytest/ 
       rm -f ~/zimbra_extension_course/mytest.jar
 
-To load the extension into Zimbra you have to restart Zimbra's mailbox process
+To load the extension into Zimbra you have to restart Zimbra's mailbox process:
 
       cd /tmp
       su zimbra 
@@ -152,7 +194,27 @@ An output like this means all went well:
       2020-03-10 15:27:16,284 INFO  [main] [] extensions - registered handler at /mytest
       2020-03-10 15:27:16,284 INFO  [main] [] extensions - Initialized extension MytestExtension: com.example.mytest.MytestExtension@com.zimbra.cs.extension.ZimbraExtensionClassLoader@45b32dfe
       
-You can now visit https://testserver.example.com/service/extension/mytest to see the extension.
+Go to https://testserver.example.com/service/extension/mytest to see the extension.
+
+## The Mytest extension
+
+The `Mytest` extension is a demo that show how to make a single HTTP request that contains JSON and binary files. The extension reads the request, parses the JSON part and adds additional JSON elements containing the (binary) files from the request. The server response is then displayed on the page and if any images where submitted, those are displayed as well. You can make requests by going to https://testserver.example.com/service/extension/mytest and use the HTML form.
+
+By analysing the code you can see that both the front-end and back-end parse the JSON. Notice the use of unicode characters, emoji's and other special characters in the demo to make sure the character set was transferred correctly.
+
+> ![](screenshots/05-Zimlet-Requests/01-Hello-World.png)
+*Sending demo requests*
+
+You can open the web browser developer console by hitting F12. You can then take a look at the Network tab to learn how the data is sent over the network.
+
+![](screenshots/05-Zimlet-Requests/02-Network-Headers.png)
+*Display the HTTP headers.*
+
+![](screenshots/05-Zimlet-Requests/03-Network-Params.png)
+*Display the request content to the server.*
+
+![](screenshots/05-Zimlet-Requests/04-Network-Response.png)
+*Display the response content from the server.*
 
 ## Setting up IntelliJ IDEA 
 
@@ -329,48 +391,6 @@ Added for reference this is how the final result looks in 8.8.15 patch 8:
  <key name="mailboxd_java_options">
  <value>-server -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -Djdk.tls.client.protocols=TLSv1,TLSv1.1,TLSv1.2 -Djava.awt.headless=true -Dsun.net.inetaddr.ttl=${networkaddress_cache_ttl} -Dorg.apache.jasper.compiler.disablejsr199=true -XX:+UseG1GC -XX:SoftRefLRUPolicyMSPerMB=1 -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=15 -XX:G1MaxNewSizePercent=45 -XX:-OmitStackTraceInFastThrow -verbose:gc -Xlog:gc*=info,safepoint=info:file=/opt/zimbra/log/gc.log:time:filecount=20,filesize=10m -Djava.net.preferIPv4Stack=true -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</value>
 ```
-
-## Enable multipart/form-data on Zimbra Extensions
-
-On your test server set the MultipartConfig so that the `Mytest` extension can receive multipart/form-data requests. Append the following:
-
-```xml
-   <multipart-config>
-   </multipart-config>
-```
-
-To the `ExtensionDispatcherServlet` in the files:
-
-   - /opt/zimbra/jetty_base/etc/service.web.xml.in
-   - /opt/zimbra/jetty_base/webapps/service/WEB-INF/web.xml
-
-Restart Zimbra with `zmcontrol restart`. The final result looks like this on 8.8.15 patch 8:
-
-```xml
-  <servlet>
-    <servlet-name>ExtensionDispatcherServlet</servlet-name>
-    <servlet-class>com.zimbra.cs.extension.ExtensionDispatcherServlet</servlet-class>
-    <async-supported>true</async-supported>
-    <load-on-startup>2</load-on-startup>
-    <init-param>
-      <param-name>allowed.ports</param-name>
-      <param-value>8080, 8443, 7071, 7070, 7072, 7443</param-value>
-    </init-param>
-  <multipart-config>
-  </multipart-config>
-  </servlet>
-```
-
-This will allow you to use HttpServletRequest.getPart() and HttpServletRequest.getParts() to get multipart/form-data parts. Without this config change you will need to use org.apache.commons.fileupload and do some manual processing, this is (encoding) error prone.
-
-Further reading: 
-
-   - https://stackoverflow.com/questions/2422468/how-to-upload-files-to-server-using-jsp-servlet
-   - https://docs.oracle.com/javaee/6/api/javax/servlet/annotation/MultipartConfig.html
-   - http://www.mastertheboss.com/javaee/servlet-30/uploading-a-file-with-a-servlet
-   - https://en.wikipedia.org/wiki/Mojibake
-
-If you do not want to make such a change on your production server, you can do a file upload using: https://github.com/Zimbra-Community/owncloud-zimlet/blob/soapServiceBarry/docconvert/extension/src/tk/barrydegraaff/docconvert/DocConvert.java
 
 ## MytestExtension.java
 
