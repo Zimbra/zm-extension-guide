@@ -701,3 +701,8 @@ java*
 out
 
 ```
+
+## Testing considerations
+Now that you have completed your extension, don't forget to test it
+
+- on multiple revisions of Zimbra.
