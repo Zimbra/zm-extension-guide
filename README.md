@@ -543,7 +543,7 @@ public class Mytest extends ExtensionHttpHandler {
 
         try {
             //Get the jsondata field from the multipart request send to the server and parse it to JSON Object.
-            JSONObject receivedJSON = new JSONObject(IOUtils.toString(req.getPart("jsondata").getInputStream()));
+            JSONObject receivedJSON = new JSONObject(IOUtils.toString(req.getPart("jsondata").getInputStream(), "UTF-8"));
 
             //Initialize some variables to hold the binary files posted to the server.
             JSONObject filesParent = new JSONObject();
