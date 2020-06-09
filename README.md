@@ -77,7 +77,7 @@ Create a folder on your local computer to store the `Mytest` extension and insta
       cd ~/zimbra_extension_course
       sudo yum install -y git ant make zip
       sudo apt install -y git ant make zip
-      git clone https://github.com/Zimbra/zm-extension-guide
+      git clone https://github.com/Zimbra/zm-extension-guide .
 
 Next step is to copy the Java libraries from your test server to your local computer.
 
