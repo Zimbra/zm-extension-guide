@@ -6,7 +6,7 @@ If you have never wrote software before or find the Java code in this article ov
 
 ## Prerequisites 
 
-To follow the steps in this article you need a Zimbra test server. You can set this up in a Virtual Machine in the cloud or you can install it on your local computer inside VirtualBox/KVM/Parallels etc. If you decide to set it up on your local computer you need at least an i5 with 16GB of RAM and a SSD. Your test server needs to be accessible over SSH. Instructions on how to set up your Zimbra server: https://blog.zimbra.com/2018/01/install-zimbra-collaboration-8-8-ubuntu-16-04-lts/ make sure to install the latest patches. You can find instructions on how to install patches at https://wiki.zimbra.com/wiki/Zimbra_Releases
+To follow the steps in this article you need a Zimbra test server. You can set this up in a Virtual Machine in the cloud or you can install it on your local computer inside VirtualBox/KVM/Parallels etc. If you decide to set it up on your local computer you need at least an i5 with 16GB of RAM and a SSD. Your test server needs to be accessible over SSH. To get started quickly it is recommended to use Ubuntu 20 and our automated installer:  https://github.com/Zimbra/zinstaller
 
 ## Zimbra extensions
 
