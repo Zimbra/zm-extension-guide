@@ -3,6 +3,7 @@ package com.example.mytest;
 import com.google.common.net.HttpHeaders;
 import com.zimbra.common.util.HttpUtil;
 import com.zimbra.common.util.StringUtil;
+import com.zimbra.common.util.ZimbraLog;
 import com.zimbra.cs.account.Provisioning;
 import com.zimbra.cs.extension.ExtensionHttpHandler;
 import com.zimbra.cs.account.AuthToken;
@@ -57,6 +58,33 @@ public class Mytest extends ExtensionHttpHandler {
         resp.setHeader("Content-Type", "text/html;charset=UTF-8");
         //Copy the contents of the static HTML to the response.
         in.transferTo(resp.getOutputStream());
+
+
+        /* Here are some examples of how to write to log files
+         */
+        ZimbraLog.extensions.info("this is an info message that will show up in /opt/zimbra/log/mailbox.log");
+        ZimbraLog.extensions.error("this is an error message that will show up in /opt/zimbra/log/mailbox.log");
+        ZimbraLog.extensions.debug("this is a debug message that will show up in /opt/zimbra/log/mailbox.log if debug logging level is set for extensions");
+
+        /* To enable the debug log, append to /opt/zimbra/conf/log4j.properties.in and /opt/zimbra/conf/log4j.properties the following and restart mailbox:
+        logger.extensions.name = zimbra.extensions
+        logger.extensions.level = debug
+        logger.extensions.additivity = false
+        logger.extensions.appenderRef.LOGFILE.ref = mailboxFile
+        */
+        System.out.println("This logs to /opt/zimbra/log/zmmailboxd.out, avoid using this");
+
+        long a = 24567;
+        long b = 0;
+        try {
+            long c = (a / b) * 100; //Cannot divide by zero
+        } catch (Exception e) {
+            //Here is an example of adding variables to the log message:
+            ZimbraLog.extensions.info("Some error happened : %s for : %s", Long.toString(a), e.getMessage());
+            //printStackTrace() logs to /opt/zimbra/log/zmmailboxd.out, avoid using this
+            e.printStackTrace();
+        }
+
     }
 
     /**

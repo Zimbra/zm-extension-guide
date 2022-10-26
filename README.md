@@ -692,3 +692,93 @@ out
 Now that you have completed your extension, don't forget to test it
 
 - on multiple revisions of Zimbra.
+
+## How to write to log files from a Zimbra Extension
+
+In `MyTest.java` you can find some examples of how to write to the Zimbra log files. The most common ones are:
+
+```java
+ZimbraLog.extensions.info("this is an info message that will show up in /opt/zimbra/log/mailbox.log");
+ZimbraLog.extensions.error("this is an error message that will show up in /opt/zimbra/log/mailbox.log");
+```
+
+To see the logging in action run a tail on the log file as user root and visit the extension page in your browser https://testserver.example.com/service/extension/mytest:
+```
+tail -f /opt/zimbra/log/mailbox.log
+```
+
+The log will look as follows:
+```
+2022-10-26 11:12:25,174 INFO  [qtp48914743-18:https://zimbra10.barrydegraaff.nl/service/extension/mytest] [] extensions - this is an info message that will show up in /opt/zimbra/log/mailbox.log
+2022-10-26 11:12:25,174 ERROR [qtp48914743-18:https://zimbra10.barrydegraaff.nl/service/extension/mytest] [] extensions - this is an error message that will show up in /opt/zimbra/log/mailbox.log
+
+```
+
+This is an example of a log message that contains variables:
+```java
+ ZimbraLog.extensions.info("Some error happened : %s for : %s", Long.toString(a), e.getMessage());
+```
+
+It will show in the log as follows:
+```
+2022-10-26 11:12:25,174 INFO  [qtp48914743-18:https://zimbra10.barrydegraaff.nl/service/extension/mytest] [] extensions - Some error happened : 24567 for : / by zero
+```
+
+Different log levels exist to keep the size of the logging manageable in a production environment. You can use the debug log level to troubleshoot problems and/or log extensive amounts of data. By default the log level in Zimbra is set so that INFO and ERROR level messages are stored in the log and debug level messages are not stored.
+
+To enable the storing of debug level messages for extensions append to /opt/zimbra/conf/log4j.properties.in and /opt/zimbra/conf/log4j.properties the following:
+
+```
+logger.extensions.name = zimbra.extensions
+logger.extensions.level = debug
+logger.extensions.additivity = false
+logger.extensions.appenderRef.LOGFILE.ref = mailboxFile
+```
+
+You will have to restart Zimbra using:
+```
+sudo su zimbra - 
+zmmailboxdctl restart
+```
+
+You can now use the following:
+```java
+ZimbraLog.extensions.debug("this is a debug message that will show up in /opt/zimbra/log/mailbox.log if debug logging level is set for extensions");
+```
+
+This will show up in the /opt/zimbra/log/mailbox.log like this:
+```
+2022-10-26 11:12:25,174 DEBUG [qtp48914743-18:https://zimbra10.barrydegraaff.nl/service/extension/mytest] [] extensions - this is a debug message that will show up in /opt/zimbra/log/mailbox.log if debug logging level is set for extensions
+```
+
+Other means of logging that you should avoid if possible:
+
+```java
+System.out.println("This logs to /opt/zimbra/log/zmmailboxd.out, avoid using this");
+```
+This will literally only print the text of the message, but no date/time stamp. So it can be used at development time, but in production it will be hard to correlate the error message with other events logged by Zimbra.
+
+printStackTrace() is very useful in diagnosing exceptions during development time. Most of the exception you should deal with properly in your code and that should avoid the need for calling printStackTrace() a lot in production. So use it wisely. An example:
+
+```java
+long a = 24567;
+long b = 0;
+try {
+    long c = (a / b) * 100; //Cannot divide by zero
+} catch (Exception e) {
+    //printStackTrace() logs to /opt/zimbra/log/zmmailboxd.out, avoid using this
+    e.printStackTrace();
+}
+```
+
+This will log around 80 lines of Java stack trace to /opt/zimbra/log/zmmailboxd.out it looks like this:
+
+```
+java.lang.ArithmeticException: / by zero
+	at com.example.mytest.Mytest.doGet(Mytest.java:74)
+	at com.zimbra.cs.extension.ExtensionDispatcherServlet.service(ExtensionDispatcherServlet.java:111)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:790)
+	at org.eclipse.jetty.servlet.ServletHolder.handle(ServletHolder.java:799)
+	at org.eclipse.jetty.servlet.ServletHandler$ChainEnd.doFilter(ServletHandler.java:1631)
+   ...
+```
