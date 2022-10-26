@@ -632,8 +632,8 @@ Even though you could use IntelliJ to create the jar files for your extension, i
                includeantruntime="false"
                debug="true"
                debuglevel="lines,vars,source"
-               target="13"
-               source="13">
+               target="17"
+               source="17">
             <classpath>
                 <path refid="libraries" />
             </classpath>
