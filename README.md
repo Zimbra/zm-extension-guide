@@ -120,6 +120,8 @@ We will explain the build process later in the article.
 
 ## Enable multipart/form-data on Zimbra Extensions
 
+If you are using a new installation of Zimbra 9 or above, multipart/form-data is enabled by default and you can skip this step.
+
 Enable multipart-config on your test server to enable processing of JSON and binary files in a single HTTP request. Append the following:
 
 ```xml
@@ -173,8 +175,7 @@ Then you can copy the extension to your test server and remove it from the local
 
 To load the extension into Zimbra you have to restart Zimbra's mailbox process:
 
-      cd /tmp
-      su zimbra 
+      su - zimbra
       zmmailboxdctl restart
       
 Monitor the log files while developing and deploying extensions. The relevant log files are:
