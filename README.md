@@ -176,7 +176,6 @@ Then you can copy the extension to your test server and remove it from the local
 To load the extension into Zimbra you have to restart Zimbra's mailbox process:
 
       su - zimbra
-      cd ~
       zmmailboxdctl restart
       
 Monitor the log files while developing and deploying extensions. The relevant log files are:
